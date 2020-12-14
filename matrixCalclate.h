@@ -68,6 +68,116 @@ void InputMTX(MTX *mtx){
         printf("\n");
     }
 }
+MTX AddMTX(MTX mtx1,MTX mtx2){
+    MTX ret;
+    if(mtx1.h!=mtx2.h||mtx1.w!=mtx2.w){
+        printf("第一引数の行列の形と,第二引数の行列の形が一致していません!\n");
+        return ret;
+    }
+    ret=GenerateMTX(mtx1.h,mtx1.w);
+    int i,j,k;
+    for(i=0;i<ret.h;i++){
+        for(j=0;j<ret.w;j++){
+            ret.element[i][j]=mtx1.element[i][j]+mtx2.element[i][j];
+        }
+    }
+    return ret;
+}
+
+double Determinant(int n,double **a){//再帰関数//double hyouji(int n,double a[][n])//左から順に変数が宣言されている？・・・
+    int i,j;//この関数は常に0行目について余因子展開を行う。　//bは世因子展開後のやつ
+    
+    if(n==1){//一次正方行列だった時
+        return a[0][0];
+    }
+    else if(n==2){//二次正方行列だった時
+        return a[0][0]*a[1][1]-a[1][0]*a[0][1];
+    }
+
+    else if(n==3){//三次正方行列だった時
+        return a[0][0]*a[1][1]*a[2][2]+a[0][1]*a[1][2]*a[2][0]+a[0][2]*a[1][0]*a[2][1]-(a[0][2]*a[1][1]*a[2][0]+a[0][0]*a[1][2]*a[2][1]+a[0][1]*a[1][0]*a[2][2]);
+    }
+    else{//四次正方行列以上だった時
+        int v=0,w=0,r,seifuhanntei;//vは行wは列を担当
+        double ans=0;
+        double **b;//何度も使いまわす。
+        b=(double **)malloc(sizeof(double*)*(n-1));
+        for(i=0;i<n;i++){
+            b[i]=(double *)malloc(sizeof(double)*(n-1));
+        }
+        //0行目について（a[0][n]について）余因子展開を行う
+        
+        
+    for(r=0;r<n;r++){
+        //a[0][r]での展開
+        v=0;
+        for(i=0;i<n;i++){//座標(0,r)で余因子展開　後でa[0][r]の値を乗算する。
+            if(i==0) continue;
+            w=0;
+            for(j=0;j<n;j++){
+                if(j==r) continue;
+                b[v][w]=a[i][j];
+                w++;
+            }
+            v++;
+        }
+        //hyouji(n-1,b);//世因子展開が上手くいっているかを判定
+        seifuhanntei=1;
+        for(i=0;i<r;i++) seifuhanntei=seifuhanntei*(-1);//余因子展開の際の正負判定
+        ans=ans+a[0][r]*Determinant(n-1,b)*seifuhanntei;
+        for(i=0;i<n;i++){
+            free(b[i]);
+        }
+        free(b);
+    }
+    return ans;
+    }
+}
+
+double DeterminantMTX(MTX mtx){
+    if(mtx.h!=mtx.w){
+        printf("行列式は正方行列でしか定義できません,行と列の数が違います！ 実行できません\n");
+        exit(-1);
+    }
+    return Determinant(mtx.h,mtx.element);
+}
+//余因子行列を求める yとxが余因子展開の爆心地
+MTX CofactorExpandMTX(int y,int x,MTX mtx){
+    MTX ret=GenerateMTX(mtx.h-1,mtx.w-1);
+    int i,j,k=0,l=0;
+    for(i=0;i<mtx.h;i++){
+        l=0;
+        if(i==y) continue;
+        for(j=0;j<mtx.w;j++){
+            if(j==x) continue;
+            ret.element[k][l]=mtx.element[i][j];
+            l++;
+        }
+        k++;
+    }
+    return ret;
+}
+
+//逆行列を求める
+MTX InverseMTX(MTX mtx){
+    if(mtx.h!=mtx.w){
+        printf("逆行列を求めるためには正方行列であることが前提です、実行できません\n");
+        exit(-1);
+    }
+    double det=DeterminantMTX(mtx);
+    MTX ret=GenerateMTX(mtx.h,mtx.w);
+    if(det==0){
+        printf("行列式が0の為逆行列は存在しません,(全要素0の行列を返します)");
+        return ret;
+    }
+    int i,j,k;
+    for(i=0;i<mtx.h;i++){
+        for(j=0;j<mtx.w;j++){//P56より a*ij=(-1)^(i+j)*|Aji|
+            ret.element[i][j]=DeterminantMTX(CofactorExpandMTX(j,i,mtx))*pow(-1,i+j)/det;
+        }
+    }
+    return ret;
+}
 
 
 //複素数演算
@@ -139,7 +249,7 @@ int inverse_block(int n,Complex_Num *input,Complex_Num *output){//n=2^mで固定
         if(i<n/2){
             //イメージ//output[bit_inverse[i]]=(input[iN2]-W(iN2,n)*input[iN2+n/2]/W(iN2+n/2,n))/(1-W(iN2,n)/W(iN2+n/2,n));
             //miss//output[i]=Complex_divid( Complex_sub( input[A], Complex_multiply( Complex_divid(W(A,n),W(A+n/2)),input[A+n/2] ) ),(Complex_sub(one,Complex_divid(W(A,n),W(A+n/2)))) );
-           output[i]=Complex_divid(Complex_sub(Complex_multiply(W(A+n/2,n),input[A]),Complex_multiply(W(A,n),input[A+n/2])),Complex_sub(W(A+n/2,n),W(A,n)));
+            output[i]=Complex_divid(Complex_sub(Complex_multiply(W(A+n/2,n),input[A]),Complex_multiply(W(A,n),input[A+n/2])),Complex_sub(W(A+n/2,n),W(A,n)));
            // printf("[i]=%d\n",bit_inverse[i]);
         }
         if(i>=n/2){
@@ -212,8 +322,6 @@ void FFT(int n,Complex_Num *input,Complex_Num *output){
     }
     free(temp);
     
-
-   
 }
 
 void iFFT(int n,Complex_Num *input,Complex_Num *output){ //動作確認済み7/4、iFFT完成セリ！！！
