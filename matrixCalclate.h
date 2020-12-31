@@ -3,6 +3,7 @@
 
 #include<math.h>
 #include<stdlib.h>
+#include<stdio.h>
 //これは,行列演算用の自作ライブラリです。
 typedef struct {
     //行  行数
@@ -56,6 +57,40 @@ void ShowMTX(MTX mtx){
         }
         printf("\n");
     }
+}
+//第一引数:MTX 第二引数:char*
+void FprintMTX(MTX mtx,char* fileName){
+    int i,j;
+    FILE *fp;
+    fp=fopen(fileName,"w");
+    if(fp==NULL) return;
+    //行数と列数を書き込む1スペース挟んで
+    fprintf(fp,"%f %f\n",mtx.h,mtx.w);
+    //行列を書き込む
+    for(i=0;i<mtx.h;i++){
+        for(j=0;j<mtx.w;j++){
+            fprintf(fp,"%f ",mtx.element[i][j]);
+        }
+        fprintf(fp,"\n");
+    }
+}
+
+MTX FscanMTX(char* fileName){
+    int i,j,H,W;
+    FILE *fp;
+    MTX ret;
+    fp=fopen(fileName,"r");
+    if(fp==NULL){
+        printf("該当するファイルが存在しません!");
+        exit(-1);
+    }
+    fscanf(fp,"%lf %lf",&ret.h,&ret.w);
+    for(i=0;i<ret.h;i++){
+        for(j=0;j<ret.w;j++){
+            fscanf(fp,"%lf",&ret.element[i][j]);
+        }
+    }
+    return ret;
 }
 
 void InputMTX(MTX *mtx){
