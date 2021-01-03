@@ -4,14 +4,18 @@
 #include"matrixCalclate.h"
 
 int main(){
-    MTX mtx1=GenerateMTX(2,2);
-    MTX mtx2=GenerateMTX(2,2);
-    MTX mtx3=GenerateMTX(2,1);
-    InputMTX(&mtx1);
-    InputMTX(&mtx3);
-    //InputMTX(&mtx2);
+    MTX mtx1,mtx2;
+    //mtx1=GenerateMTX(3,3);
+    mtx1=FscanMTX("mtxData.txt");
+    ShowMTX(mtx1);
+    //InputMTX(&mtx1);
     //printf("%f",);
     //ShowMTX(CofactorExpandMTX(0,1,mtx1));
+    
+    //printf("mtx=%f",DeterminantMTX(mtx1));
     mtx2=InverseMTX(mtx1);
-    ShowMTX(MultiplyMTX(mtx2,mtx3));
+    //printf("test\n");
+    //FprintMTX(mtx2,"mtxTest2.txt");
+    ShowMTX(mtx2);
 }
+

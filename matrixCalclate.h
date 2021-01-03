@@ -51,6 +51,7 @@ MTX MultiplyMTX(MTX mtx1,MTX mtx2){
 
 void ShowMTX(MTX mtx){
     int i,j;
+    printf("H=%d W=%d\n",mtx.h,mtx.w);
     for(i=0;i<mtx.h;i++){
         for(j=0;j<mtx.w;j++){
             printf(" %f",mtx.element[i][j]);
@@ -65,7 +66,7 @@ void FprintMTX(MTX mtx,char* fileName){
     fp=fopen(fileName,"w");
     if(fp==NULL) return;
     //行数と列数を書き込む1スペース挟んで
-    fprintf(fp,"%f %f\n",mtx.h,mtx.w);
+    fprintf(fp,"%d %d\n",mtx.h,mtx.w);
     //行列を書き込む
     for(i=0;i<mtx.h;i++){
         for(j=0;j<mtx.w;j++){
@@ -84,7 +85,8 @@ MTX FscanMTX(char* fileName){
         printf("該当するファイルが存在しません!");
         exit(-1);
     }
-    fscanf(fp,"%lf %lf",&ret.h,&ret.w);
+    fscanf(fp,"%d %d",&H,&W);
+    ret=GenerateMTX(H,W);
     for(i=0;i<ret.h;i++){
         for(j=0;j<ret.w;j++){
             fscanf(fp,"%lf",&ret.element[i][j]);
@@ -137,35 +139,35 @@ double Determinant(int n,double **a){//再帰関数//double hyouji(int n,double 
         double ans=0;
         double **b;//何度も使いまわす。
         b=(double **)malloc(sizeof(double*)*(n-1));
-        for(i=0;i<n;i++){
+        for(i=0;i<n-1;i++){//ここn-1じゃないと領域侵犯が発生する
             b[i]=(double *)malloc(sizeof(double)*(n-1));
         }
         //0行目について（a[0][n]について）余因子展開を行う
         
         
-    for(r=0;r<n;r++){
-        //a[0][r]での展開
-        v=0;
-        for(i=0;i<n;i++){//座標(0,r)で余因子展開　後でa[0][r]の値を乗算する。
-            if(i==0) continue;
-            w=0;
-            for(j=0;j<n;j++){
-                if(j==r) continue;
-                b[v][w]=a[i][j];
-                w++;
+        for(r=0;r<n;r++){
+            //a[0][r]での展開
+            v=0;
+            for(i=0;i<n;i++){//座標(0,r)で余因子展開　後でa[0][r]の値を乗算する。
+                if(i==0) continue;
+                w=0;
+                for(j=0;j<n;j++){
+                    if(j==r) continue;
+                    b[v][w]=a[i][j];
+                    w++;
+                }
+                v++;
             }
-            v++;
+            //hyouji(n-1,b);//世因子展開が上手くいっているかを判定
+            seifuhanntei=1;
+            for(i=0;i<r;i++) seifuhanntei=seifuhanntei*(-1);//余因子展開の際の正負判定
+            ans=ans+a[0][r]*Determinant(n-1,b)*seifuhanntei;
         }
-        //hyouji(n-1,b);//世因子展開が上手くいっているかを判定
-        seifuhanntei=1;
-        for(i=0;i<r;i++) seifuhanntei=seifuhanntei*(-1);//余因子展開の際の正負判定
-        ans=ans+a[0][r]*Determinant(n-1,b)*seifuhanntei;
-        for(i=0;i<n;i++){
+        for(i=0;i<n-1;i++){//ここn-1じゃないと領域侵犯が発生する
             free(b[i]);
         }
         free(b);
-    }
-    return ans;
+        return ans;
     }
 }
 
@@ -193,22 +195,42 @@ MTX CofactorExpandMTX(int y,int x,MTX mtx){
     return ret;
 }
 
+//軽量化版 返り値の値は第三引数の指す先へ返される 余因子行列を求める(逆行列用) yとxが余因子展開の爆心地
+void CofactorExpandMTX2(int y,int x,MTX mtx,MTX *ret){
+    int i,j,k=0,l=0;
+    for(i=0;i<mtx.h;i++){
+        l=0;
+        if(i==y) continue;
+        for(j=0;j<mtx.w;j++){
+            if(j==x) continue;
+            ret[0].element[k][l]=mtx.element[i][j];
+            l++;
+        }
+        k++;
+    }
+}
+
+
 //逆行列を求める
 MTX InverseMTX(MTX mtx){
+    MTX ret=GenerateMTX(mtx.h,mtx.w);
+    MTX cofacter=GenerateMTX(mtx.h-1,mtx.w-1);//何度も使いまわす
     if(mtx.h!=mtx.w){
         printf("逆行列を求めるためには正方行列であることが前提です、実行できません\n");
         exit(-1);
     }
     double det=DeterminantMTX(mtx);
-    MTX ret=GenerateMTX(mtx.h,mtx.w);
     if(det==0){
-        printf("行列式が0の為逆行列は存在しません,(全要素0の行列を返します)");
+        printf("行列式が0の為逆行列は存在しません 全要素0の行列を返します");
         return ret;
     }
     int i,j,k;
     for(i=0;i<mtx.h;i++){
         for(j=0;j<mtx.w;j++){//P56より a*ij=(-1)^(i+j)*|Aji|
-            ret.element[i][j]=DeterminantMTX(CofactorExpandMTX(j,i,mtx))*pow(-1,i+j)/det;
+            CofactorExpandMTX2(j,i,mtx,&cofacter);//こっちの方が領域確保の回数が少なく処理が早い
+            ret.element[i][j]=DeterminantMTX(cofacter)*pow(-1,i+j)/det;
+            //ret.element[i][j]=DeterminantMTX(CofactorExpandMTX(j,i,mtx))*pow(-1,i+j)/det;
+            if(ret.element[i][j]==0) ret.element[i][j]=0;
         }
     }
     return ret;
