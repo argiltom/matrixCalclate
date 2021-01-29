@@ -235,6 +235,32 @@ MTX InverseMTX(MTX mtx){
     }
     return ret;
 }
+//二次元回転行列を生成,第一引数(n)=2なら,2×2の回転行列を返し,n=3なら,同時座標表現の3×3の行列を返す 角度は第二引数で受け取り,単位はラジアン
+MTX Rotation_2D_GenerateMTX(int n,double rad){
+    MTX ret;
+    if(n==2){
+        ret=GenerateMTX(2,2);
+        ret.element[0][0]=cos(rad);
+        ret.element[0][1]=-sin(rad);
+        ret.element[1][0]=sin(rad);
+        ret.element[1][1]=cos(rad);
+    }
+    else if(n==3){//同時座標表現
+        ret=GenerateMTX(3,3);
+        ret.element[0][0]=cos(rad);
+        ret.element[0][1]=-sin(rad);
+        ret.element[0][2]=0;
+        ret.element[1][0]=sin(rad);
+        ret.element[1][1]=cos(rad);
+        ret.element[1][2]=0;
+        ret.element[2][0]=0;
+        ret.element[2][1]=0;
+        ret.element[2][2]=1;
+    }else{
+        printf("引数が不正です！！");
+    }
+    return ret;
+}
 
 
 //複素数演算
