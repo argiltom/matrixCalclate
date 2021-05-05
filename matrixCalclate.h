@@ -235,6 +235,24 @@ MTX InverseMTX(MTX mtx){
     }
     return ret;
 }
+//転置行列を返す
+MTX TransposeMTX(MTX mtx){
+    MTX ret=GenerateMTX(mtx.w,mtx.h);
+    int i,j;
+    for(i=0;i<mtx.h;i++){
+        for(j=0;j<mtx.w;j++){
+            ret.element[j][i]=mtx.element[i][j];
+        }
+    }
+    return ret;
+}
+
+//一般逆行列を求める
+MTX GeneralInverseMTX(MTX mtx){
+    MTX tMtx=TransposeMTX(mtx);
+    MTX ret=MultiplyMTX(InverseMTX(MultiplyMTX(tMtx,mtx)),tMtx);
+    return ret;
+}
 //二次元回転行列を生成,第一引数(n)=2なら,2×2の回転行列を返し,n=3なら,同時座標表現の3×3の行列を返す 角度は第二引数で受け取り,単位はラジアン
 MTX Rotation_2D_GenerateMTX(int n,double rad){
     MTX ret;
