@@ -18,6 +18,10 @@ int main(){
     mtx2=InverseMTX(mtx1);
     ShowMTX(mtx2);
 
+    
+    FprintMTX(mtx2,"outputResult.txt");
+    printf("outputResult.txtというファイル名で逆行列の演算結果をカレントディレクトリに出力しました");
+
     printf("元の行列とその逆行列の積↓\n");
     ShowMTX(MultiplyMTX(mtx1,mtx2));
     return 0;
