@@ -48,6 +48,19 @@ MTX MultiplyMTX(MTX mtx1,MTX mtx2){
     }
     return ret;
 }
+//行列にスカラーを掛ける
+MTX MultiplyScalarMTX(double scalar,MTX mtx){
+    MTX ret;
+    ret=GenerateMTX(mtx.h,mtx.w);
+    int i,j,k;
+    for(i=0;i<ret.h;i++){
+        for(j=0;j<ret.w;j++){
+            ret.element[i][j]=mtx.element[i][j]*scalar;
+        }
+    }
+    return ret;
+}
+
 
 void ShowMTX(MTX mtx){
     int i,j;
@@ -247,11 +260,21 @@ MTX TransposeMTX(MTX mtx){
     return ret;
 }
 
+//以下応用演算
+
 //一般逆行列を求める
 MTX GeneralInverseMTX(MTX mtx){
     MTX tMtx=TransposeMTX(mtx);
     MTX ret=MultiplyMTX(InverseMTX(MultiplyMTX(tMtx,mtx)),tMtx);
     return ret;
+}
+//マハラノビス距離を返す input1:クラスターの平均点(MTX(Vec)) input2:クラスターの分散共分散行列(MTX) input3:入力点(MTX(Vec))
+double MahalanobisDistance(MTX ave,MTX covariance,MTX input){
+    double retVal;
+    MTX deviation=AddMTX(input,MultiplyScalarMTX(-1,ave));
+    MTX mid = MultiplyMTX(MultiplyMTX(TransposeMTX(deviation),InverseMTX(covariance)),deviation);
+    retVal=sqrt(mid.element[0][0]);
+    return retVal;
 }
 //二次元回転行列を生成,第一引数(n)=2なら,2×2の回転行列を返し,n=3なら,同時座標表現の3×3の行列を返す 角度は第二引数で受け取り,単位はラジアン
 MTX Rotation_2D_GenerateMTX(int n,double rad){
