@@ -302,7 +302,133 @@ MTX Rotation_2D_GenerateMTX(int n,double rad){
     }
     return ret;
 }
+//Z軸回転について、3次元の同時座標表現で返す引数はラジアン
+MTX RotationZ_3D_GenerateMTX(double rad){
+    MTX ret;
+    ret=GenerateMTX(4,4);
+    ret.element[0][0]=cos(rad);
+    ret.element[0][1]=-sin(rad);
+    ret.element[0][2]=0;
+    ret.element[0][3]=0;
 
+    ret.element[1][0]=sin(rad);
+    ret.element[1][1]=cos(rad);
+    ret.element[1][2]=0;
+    ret.element[1][3]=0;
+
+    ret.element[2][0]=0;
+    ret.element[2][1]=0;
+    ret.element[2][2]=1;
+    ret.element[2][3]=0;
+
+    ret.element[3][0]=0;
+    ret.element[3][1]=0;
+    ret.element[3][2]=0;
+    ret.element[3][3]=1;
+    return ret;
+}
+//X軸回転について、3次元の同時座標表現で返す引数はラジアン
+MTX RotationX_3D_GenerateMTX(double rad){
+    MTX ret;
+    ret=GenerateMTX(4,4);
+    ret.element[0][0]=1;
+    ret.element[0][1]=0;
+    ret.element[0][2]=0;
+    ret.element[0][3]=0;
+
+    ret.element[1][0]=0;
+    ret.element[1][1]=cos(rad);
+    ret.element[1][2]=-sin(rad);
+    ret.element[1][3]=0;
+
+    ret.element[2][0]=0;
+    ret.element[2][1]=sin(rad);
+    ret.element[2][2]=cos(rad);
+    ret.element[2][3]=0;
+
+    ret.element[3][0]=0;
+    ret.element[3][1]=0;
+    ret.element[3][2]=0;
+    ret.element[3][3]=1;
+    return ret;
+}
+
+//Y軸回転について、3次元の同時座標表現で返す引数はラジアン
+MTX RotationY_3D_GenerateMTX(double rad){
+    MTX ret;
+    ret=GenerateMTX(4,4);
+    ret.element[0][0]=cos(rad);
+    ret.element[0][1]=0;
+    ret.element[0][2]=sin(rad);
+    ret.element[0][3]=0;
+
+    ret.element[1][0]=0;
+    ret.element[1][1]=1;
+    ret.element[1][2]=0;
+    ret.element[1][3]=0;
+
+    ret.element[2][0]=-sin(rad);
+    ret.element[2][1]=0;
+    ret.element[2][2]=cos(rad);
+    ret.element[2][3]=0;
+
+    ret.element[3][0]=0;
+    ret.element[3][1]=0;
+    ret.element[3][2]=0;
+    ret.element[3][3]=1;
+    return ret;
+}
+//拡大縮小の3次元同時座標表現行列を返す
+MTX Scale_3D_GenerateMTX(double x,double y,double z){
+    MTX ret;
+    ret=GenerateMTX(4,4);
+    ret.element[0][0]=x;
+    ret.element[0][1]=0;
+    ret.element[0][2]=0;
+    ret.element[0][3]=0;
+
+    ret.element[1][0]=0;
+    ret.element[1][1]=y;
+    ret.element[1][2]=0;
+    ret.element[1][3]=0;
+
+    ret.element[2][0]=0;
+    ret.element[2][1]=0;
+    ret.element[2][2]=z;
+    ret.element[2][3]=0;
+
+    ret.element[3][0]=0;
+    ret.element[3][1]=0;
+    ret.element[3][2]=0;
+    ret.element[3][3]=1;
+    return ret;
+}
+
+//平行移動の3次元同時座標表現行列を返す
+MTX Translation_3D_GenerateMTX(double x,double y,double z){
+    MTX ret;
+    ret=GenerateMTX(4,4);
+    ret.element[0][0]=1;
+    ret.element[0][1]=0;
+    ret.element[0][2]=0;
+    ret.element[0][3]=x;
+
+    ret.element[1][0]=0;
+    ret.element[1][1]=1;
+    ret.element[1][2]=0;
+    ret.element[1][3]=y;
+
+    ret.element[2][0]=0;
+    ret.element[2][1]=0;
+    ret.element[2][2]=1;
+    ret.element[2][3]=z;
+
+    ret.element[3][0]=0;
+    ret.element[3][1]=0;
+    ret.element[3][2]=0;
+    ret.element[3][3]=1;
+    return ret;
+}
 
 //複素数演算
 typedef struct complex_number{
